@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -15,9 +17,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 // add a snippetView handler function
 func snippetView(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("Display a specific snippet..."))
-	if err != nil {
-		log.Fatal("Failed to write response for method snippetView(): ", err)
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Use the fmt.Sprintf() function to interpolate the id value with a message, then write it as the HTTP response
+	msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
+
+	_, err_msg := w.Write([]byte(msg))
+	if err_msg != nil {
+		log.Fatal("Failed to write response for method snippetView(): ", err_msg)
 		return
 	}
 }
@@ -35,7 +46,7 @@ func main() {
 	// Use the http.NewServeMux() function to initialize a new servemux, then register the home function as the handler for the "/" url pattern
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", home)
-	mux.HandleFunc("/snippet/view", snippetView)
+	mux.HandleFunc("/snippet/view/{id}", snippetView)
 	mux.HandleFunc("/snippet/create", snippetCreate)
 
 	// Print a log message to say that the server is starting
