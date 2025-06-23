@@ -21,16 +21,21 @@ func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// log.Print("Failed to parse template for method home(): ", err.Error())
 		// Beacause this home handler is now a method against the application struct it can access its fields, including the structured logger. We will use this to create a log entry at the error level containing the error message, also including the request method and URI as attributes to assist with debugging.
-		app.logger.Error("Failed to parse template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// app.logger.Error("Failed to parse template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// return
+		
+		// use the serverError helper
+		app.serverError(w, r, err)
 		return
 	}
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
 		// log.Print("Failed to execute template for method home(): ", err.Error())
 		// New log process
-		app.logger.Error("Failed to execute template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// app.logger.Error("Failed to execute template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
 }
 
