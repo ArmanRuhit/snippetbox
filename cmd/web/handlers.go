@@ -52,7 +52,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 	// Use the fmt.Sprintf() function to interpolate the id value with a message, then write it as the HTTP response
 	//msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
 
-	_, errMsg := fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
+	_, errMsg := fmt.Fprintf(w, "Display a specific snippet with ID %d...\n", id)
 	if errMsg != nil {
 		// log.Fatal("Failed to write response for method snippetView(): ", errMsg)
 		// New log process
@@ -73,14 +73,30 @@ func (app *application) SnippetCreate(w http.ResponseWriter, r *http.Request) {
 
 // SnippetCreatePost Add a snippetCreatePost handler function
 func (app *application) SnippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Server", "GO")
-	w.WriteHeader(http.StatusCreated)
-	_, err := w.Write([]byte("Save a new snippet..."))
+	// w.Header().Add("Server", "GO")
+	// w.WriteHeader(http.StatusCreated)
+	// _, err := w.Write([]byte("Save a new snippet..."))
+	// if err != nil {
+	// 	// log.Fatal("Failed to write response for method snippetCreatePost(): ", err)
+	// 	// New log process
+	// 	app.logger.Error("Failed to write response for method snippetCreatePost()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
+
+	// Create some variables holding dummy data. We'll remvoe these later on during the build
+	title := "O snail"
+	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
+	expires := 7
+
+	// Pass the data to the SnippetModel.Insert() method, recieving the ID of the new record back.
+	id, err := app.snippets.Insert(title, content, expires)
+
 	if err != nil {
-		// log.Fatal("Failed to write response for method snippetCreatePost(): ", err)
-		// New log process
-		app.logger.Error("Failed to write response for method snippetCreatePost()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
+
+	// Redirect the user to the relevant page for the snippet.
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
