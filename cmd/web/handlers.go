@@ -1,12 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
+
+	"snippetbox.armanruhit.com/internal/models"
 )
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
@@ -49,17 +52,31 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Use the SnippetModel's Get() method to retrieve the data for a specific record based on its ID. If no matching record is found return a 404 Not found response.
+	snippet, err := app.snippets.Get(id)
+	if err != nil {
+		if(errors.Is(err, models.ErrNoRecord)){
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	// Write the snippet data as a plain-text http response body
+	fmt.Fprintf(w, "%+v", snippet)
+
 	// Use the fmt.Sprintf() function to interpolate the id value with a message, then write it as the HTTP response
 	//msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
 
-	_, errMsg := fmt.Fprintf(w, "Display a specific snippet with ID %d...\n", id)
-	if errMsg != nil {
-		// log.Fatal("Failed to write response for method snippetView(): ", errMsg)
-		// New log process
-		app.logger.Error("Failed to write response for method snippetView()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", errMsg.Error()))
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+	// _, errMsg := fmt.Fprintf(w, "Display a specific snippet with ID %d...\n", id)
+	// if errMsg != nil {
+	// 	// log.Fatal("Failed to write response for method snippetView(): ", errMsg)
+	// 	// New log process
+	// 	app.logger.Error("Failed to write response for method snippetView()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", errMsg.Error()))
+	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	return
+	// }
 }
 
 // SnippetCreate add a snippetCreate handler function
