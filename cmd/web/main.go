@@ -26,7 +26,7 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 
 	// Define a new command-line flag for the mysql dsn string
-	dsn := flag.String("dsn", "web:pass1pass@/snippetbox?parseTime=true", "MySQL data source name")
+	dsn := flag.String("dsn", "web:your_new_password@/snippetbox?parseTime=true", "MySQL data source name")
 
 	// Importantly, we use the flag.Parse() funtion to parse the command-line flags. This reads in the command-line flag value and assigns it to the addr variable. You need to call this *before* you use the addr variable, otherwise it wll always contain the default value of ":4000". If any errors are encountered during parsing, the application will be terminated.
 	flag.Parse()

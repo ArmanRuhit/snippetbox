@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"html/template"
+	// "html/template"
 	"log"
 	"log/slog"
 	"net/http"
@@ -14,32 +14,42 @@ import (
 
 func (app *application) Home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Server", "GO")
-	// Initialize a slice containing the paths to the two files. It's important to note that the file containing our base template must be the *fist* file in the slice.
-	files := []string{
-		"./ui/html/base.tmpl.html",
-		"./ui/html/partials/nav.tmpl.html",
-		"./ui/html/pages/home.tmpl.html",
-	}
-	ts, err := template.ParseFiles(files...)
+
+	snippets, err := app.snippets.Latest()
 	if err != nil {
-		// log.Print("Failed to parse template for method home(): ", err.Error())
-		// Beacause this home handler is now a method against the application struct it can access its fields, including the structured logger. We will use this to create a log entry at the error level containing the error message, also including the request method and URI as attributes to assist with debugging.
-		// app.logger.Error("Failed to parse template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		// return
-		
-		// use the serverError helper
 		app.serverError(w, r, err)
 		return
 	}
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		// log.Print("Failed to execute template for method home(): ", err.Error())
-		// New log process
-		// app.logger.Error("Failed to execute template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
-		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		app.serverError(w, r, err)
+
+	for _, snippet := range snippets {
+		fmt.Fprintf(w, "+%v\n", snippet)
 	}
+	// // Initialize a slice containing the paths to the two files. It's important to note that the file containing our base template must be the *fist* file in the slice.
+	// files := []string{
+	// 	"./ui/html/base.tmpl.html",
+	// 	"./ui/html/partials/nav.tmpl.html",
+	// 	"./ui/html/pages/home.tmpl.html",
+	// }
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	// log.Print("Failed to parse template for method home(): ", err.Error())
+	// 	// Beacause this home handler is now a method against the application struct it can access its fields, including the structured logger. We will use this to create a log entry at the error level containing the error message, also including the request method and URI as attributes to assist with debugging.
+	// 	// app.logger.Error("Failed to parse template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
+	// 	// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	// return
+		
+	// 	// use the serverError helper
+	// 	app.serverError(w, r, err)
+	// 	return
+	// }
+	// err = ts.ExecuteTemplate(w, "base", nil)
+	// if err != nil {
+	// 	// log.Print("Failed to execute template for method home(): ", err.Error())
+	// 	// New log process
+	// 	// app.logger.Error("Failed to execute template for method home()", slog.String("method", r.Method), slog.String("uri", r.URL.RequestURI()), slog.String("error", err.Error()))
+	// 	// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	// 	app.serverError(w, r, err)
+	// }
 }
 
 // SnippetView add a snippetView handler function

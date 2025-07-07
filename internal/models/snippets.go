@@ -95,8 +95,21 @@ func (m *SnippetModel) Latest() ([]Snippet, error){
 		var s Snippet
 
 		// Use rows.Scan() to copy the values from each field in the row to the new Snippet object that we created. Again, the arguments to row.Scan() must be pointers to the place you want to copy the data into, and the number of arguments must be exactly the same as the number of columns returned by your statement
-		err = rows.Scan(&s.ID, &s.Title, )
+		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+		if err != nil {
+			return nil, err
+		}
+
+		// Append it to the slice of snippets
+		snippets = append(snippets, s)
 	}
 
-	return nil, nil
+
+	// When the rows.Next() loop has finished we call rows.Err() to retrieve any error that was encountered during the iteration. It's important to call this - don't assume that a successful iteration was completed
+	if err = rows.Err(); err != nil {
+		return nil, err
+	} 
+	
+	// If everything went OK then return the Snippets slice.
+	return snippets, nil
 }
