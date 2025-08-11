@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	// "html/template"
+	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
@@ -74,7 +74,7 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Write the snippet data as a plain-text http response body
-	fmt.Fprintf(w, "%+v", snippet)
+	// fmt.Fprintf(w, "%+v", snippet)
 
 	// Use the fmt.Sprintf() function to interpolate the id value with a message, then write it as the HTTP response
 	//msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
@@ -87,6 +87,27 @@ func (app *application) SnippetView(w http.ResponseWriter, r *http.Request) {
 	// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	// 	return
 	// }
+
+	// Initialize a slice containing the paths to the view.tmpl file,
+	// plus the base layout and navigation partial that we made earlier
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/view.tmpl",
+	}
+
+	// Parse the template files
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
+	// And then execute them. Notice how we are passing in the snippet
+	// data (a models.Snippet struct) as the final parameter
+	err = ts.ExecuteTemplate(w, "base", snippet)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
 }
 
 // SnippetCreate add a snippetCreate handler function
